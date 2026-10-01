@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Калькулятор ламината и кварцвинила</title>
+  <meta name="description" content="Быстрый расчет количества планок, упаковок и стоимости ламината или кварцвинила." />
+  <style>
+    :root {
+      --bg: #f4f5f7;
+      --card: #ffffff;
+      --text: #111318;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --accent: #111827;
+      --accent-2: #2563eb;
+      --soft: #f8fafc;
+      --success: #0f9d58;
+      --danger: #dc2626;
+      --radius: 18px;
+      --shadow: 0 12px 32px rgba(17, 24, 39, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .page {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+
+    .header {
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(30px, 5vw, 46px);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      max-width: 720px;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(229, 231, 235, .8);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .form-card { padding: 24px; }
+    .result-card { padding: 24px; position: sticky; top: 16px; }
+
+    .section-title {
+      margin: 0 0 18px;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+    }
+
+    .product-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      padding: 5px;
+      border-radius: 14px;
+      margin-bottom: 22px;
+    }
+
+    .product-switch button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      border-radius: 10px;
+      padding: 11px 12px;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+    }
+
+    .product-switch button.active {
+      background: #fff;
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(17,24,39,.07);
+    }
+
+    .fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      border-radius: 12px;
+      padding: 12px 13px;
+      font: inherit;
+      outline: none;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    }
+
+    .unit-row {
+      display: grid;
+      grid-template-columns: 1fr 88px;
+      gap: 8px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      flex: 1;
+    }
+
+    .btn-secondary {
+      background: #eef0f3;
+      color: var(--text);
+    }
+
+    .result-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #eefbf4;
+      color: var(--success);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .main-result {
+      background: var(--accent);
+      color: #fff;
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 14px;
+    }
+
+    .main-label {
+      opacity: .7;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .main-value {
+      font-size: clamp(32px, 5vw, 42px);
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+    }
+
+    .main-sub {
+      opacity: .72;
+      margin-top: 9px;
+      font-size: 13px;
+    }
+
+    .result-list {
+      display: grid;
+      gap: 1px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      padding: 13px 14px;
+      background: #fff;
+    }
+
+    .result-row + .result-row { border-top: 1px solid var(--line); }
+
+    .result-name { color: var(--muted); font-size: 13px; }
+    .result-value { font-weight: 800; text-align: right; }
+
+    .formula {
+      margin-top: 16px;
+      padding: 13px 14px;
+      background: var(--soft);
+      border-radius: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .error {
+      display: none;
+      margin-top: 12px;
+      background: #fff1f2;
+      color: var(--danger);
+      border-radius: 12px;
+      padding: 11px 13px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 840px) {
+      .grid { grid-template-columns: 1fr; }
+      .result-card { position: static; }
+    }
+
+    @media (max-width: 520px) {
+      .page { padding: 20px 14px 30px; }
+      .form-card, .result-card { padding: 18px; }
+      .fields { grid-template-columns: 1fr; }
+      .field.full { grid-column: auto; }
+      .unit-row { grid-template-columns: 1fr; }
+      .actions { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <span class="eyebrow">Sales calculator</span>
+      <h1>Ламинат / кварцвинил</h1>
+      <p class="subtitle">
+        Быстрый расчет планок, упаковок и итоговой стоимости с учетом подреза и скидки.
+      </p>
+    </header>
+
+    <section class="grid">
+      <div class="card form-card">
+        <h2 class="section-title">Параметры товара</h2>
+
+        <div class="product-switch" role="tablist" aria-label="Тип покрытия">
+          <button id="btnLaminate" class="active" type="button">Ламинат</button>
+          <button id="btnQuartz" type="button">Кварцвинил</button>
+        </div>
+
+        <div class="fields">
+          <div class="field full">
+            <label for="area">Площадь клиента, м²</label>
+            <input id="area" type="number" min="0.01" step="0.01" value="35" />
+          </div>
+
+          <div class="field">
+            <label for="length">Длина планки <span class="hint">мм</span></label>
+            <input id="length" type="number" min="1" step="1" value="1380" />
+          </div>
+
+          <div class="field">
+            <label for="width">Ширина планки <span class="hint">мм</span></label>
+            <input id="width" type="number" min="1" step="1" value="190" />
+          </div>
+
+          <div class="field">
+            <label for="price">Цена за м², ₽</label>
+            <input id="price" type="number" min="0" step="0.01" value="2190" />
+          </div>
+
+          <div class="field">
+            <label for="reserve">Запас на подрез, %</label>
+            <input id="reserve" type="number" min="0" max="100" step="0.5" value="10" />
+          </div>
+
+          <div class="field">
+            <label for="packCount">Планок в упаковке</label>
+            <input id="packCount" type="number" min="1" step="1" value="8" />
+          </div>
+
+          <div class="field">
+            <label for="discount">Скидка, %</label>
+            <select id="discount">
+              <option value="0">Без скидки</option>
+              <option value="10">10%</option>
+              <option value="15" selected>15%</option>
+              <option value="19">19%</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="error" class="error"></div>
+
+        <div class="actions">
+          <button id="calculate" class="btn btn-primary" type="button">Рассчитать</button>
+          <button id="reset" class="btn btn-secondary" type="button">Сбросить</button>
+        </div>
+
+        <div class="footer">
+          Длина и ширина вводятся в миллиметрах. Результат округляется до целой планки и целой упаковки.
+        </div>
+      </div>
+
+      <aside class="card result-card">
+        <div class="result-top">
+          <h2 class="section-title" style="margin:0;">Результат</h2>
+          <span id="productBadge" class="badge">Ламинат</span>
+        </div>
+
+        <div class="main-result">
+          <div class="main-label">ИТОГО К ОПЛАТЕ</div>
+          <div id="totalCost" class="main-value">—</div>
+          <div id="discountText" class="main-sub">Скидка не применена</div>
+        </div>
+
+        <div class="result-list">
+          <div class="result-row">
+            <div class="result-name">Упаковок</div>
+            <div id="packs" class="result-value">—</div>
+          </div>
+          <div class="result-row">
+            <div class="result-name">Планок всего</div>
+            <div id="boards" class="result-value">—</div>
+          </div>
+          <div class="result-row">
+            <div class="result-name">Фактически м²</div>
+            <div id="purchasedArea" class="result-value">—</div>
+          </div>
+          <div class="result-row">
+            <div class="result-name">Стоимость за фактический м²</div>
+            <div id="pricePerM2" class="result-value">—</div>
+          </div>
+          <div class="result-row">
+            <div class="result-name">Стоимость до скидки</div>
+            <div id="beforeDiscount" class="result-value">—</div>
+          </div>
+          <div class="result-row">
+            <div class="result-name">Экономия</div>
+            <div id="saving" class="result-value">—</div>
+          </div>
+        </div>
+
+        <div class="formula">
+          <strong>Формула:</strong><br>
+          площадь ÷ площадь 1 планки × (1 + запас) → необходимое количество планок →
+          округление до упаковок → фактическая площадь × цена за м² → скидка.
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const defaults = {
+      laminate: { length: 1380, width: 190, packCount: 8 },
+      quartz: { length: 1220, width: 180, packCount: 10 }
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    let productType = "laminate";
+
+    function formatNumber(value, digits = 2) {
+      return new Intl.NumberFormat("ru-RU", {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+      }).format(value);
+    }
+
+    function formatMoney(value) {
+      return new Intl.NumberFormat("ru-RU", {
+        style: "currency",
+        currency: "RUB",
+        maximumFractionDigits: 0
+      }).format(value);
+    }
+
+    function showError(message) {
+      $("error").textContent = message;
+      $("error").style.display = "block";
+    }
+
+    function clearError() {
+      $("error").style.display = "none";
+    }
+
+    function setProduct(type) {
+      productType = type;
+      const isLaminate = type === "laminate";
+
+      $("btnLaminate").classList.toggle("active", isLaminate);
+      $("btnQuartz").classList.toggle("active", !isLaminate);
+      $("productBadge").textContent = isLaminate ? "Ламинат" : "Кварцвинил";
+
+      $("length").value = defaults[type].length;
+      $("width").value = defaults[type].width;
+      $("packCount").value = defaults[type].packCount;
+
+      calculate();
+    }
+
+    function calculate() {
+      clearError();
+
+      const area = Number($("area").value);
+      const lengthMm = Number($("length").value);
+      const widthMm = Number($("width").value);
+      const price = Number($("price").value);
+      const reservePct = Number($("reserve").value);
+      const boardsPerPack = Number($("packCount").value);
+      const discountPct = Number($("discount").value);
+
+      const numbers = [area, lengthMm, widthMm, price, reservePct, boardsPerPack, discountPct];
+      if (numbers.some(v => !Number.isFinite(v))) {
+        showError("Проверьте заполнение полей.");
+        return;
+      }
+
+      if (area <= 0 || lengthMm <= 0 || widthMm <= 0 || boardsPerPack <= 0 || price < 0) {
+        showError("Площадь, размеры и количество планок в упаковке должны быть больше 0.");
+        return;
+      }
+
+      if (reservePct < 0 || reservePct > 100 || discountPct < 0 || discountPct > 100) {
+        showError("Проценты должны быть в диапазоне от 0 до 100.");
+        return;
+      }
+
+      const plankAreaM2 = (lengthMm / 1000) * (widthMm / 1000);
+
+      // Requested formula:
+      // area / plank length / plank width + reserve
+      // Interpreted mathematically as: required boards * (1 + reserve%).
+      const requiredBoardsRaw = (area / plankAreaM2) * (1 + reservePct / 100);
+      const requiredBoards = Math.ceil(requiredBoardsRaw);
+
+      const packs = Math.ceil(requiredBoards / boardsPerPack);
+      const totalBoards = packs * boardsPerPack;
+      const purchasedArea = totalBoards * plankAreaM2;
+
+      const beforeDiscount = purchasedArea * price;
+      const discountAmount = beforeDiscount * (discountPct / 100);
+      const totalCost = beforeDiscount - discountAmount;
+      const effectivePricePerM2 = purchasedArea > 0 ? totalCost / purchasedArea : 0;
+
+      $("totalCost").textContent = formatMoney(totalCost);
+      $("discountText").textContent = discountPct > 0
+        ? `Скидка ${formatNumber(discountPct, 0)}% · экономия ${formatMoney(discountAmount)}`
+        : "Скидка не применена";
+
+      $("packs").textContent = `${packs} ${packs === 1 ? "упаковка" : (packs < 5 ? "упаковки" : "упаковок")}`;
+      $("boards").textContent = `${totalBoards} шт.`;
+      $("purchasedArea").textContent = `${formatNumber(purchasedArea)} м²`;
+      $("pricePerM2").textContent = `${formatMoney(effectivePricePerM2)} / м²`;
+      $("beforeDiscount").textContent = formatMoney(beforeDiscount);
+      $("saving").textContent = discountAmount > 0 ? `− ${formatMoney(discountAmount)}` : "0 ₽";
+    }
+
+    function reset() {
+      $("area").value = 35;
+      $("price").value = 2190;
+      $("reserve").value = 10;
+      $("discount").value = 15;
+      setProduct("laminate");
+    }
+
+    $("btnLaminate").addEventListener("click", () => setProduct("laminate"));
+    $("btnQuartz").addEventListener("click", () => setProduct("quartz"));
+    $("calculate").addEventListener("click", calculate);
+    $("reset").addEventListener("click", reset);
+
+    document.querySelectorAll("input, select").forEach(el => {
+      el.addEventListener("input", calculate);
+      el.addEventListener("change", calculate);
+    });
+
+    calculate();
+  </script>
+</body>
+</html>
